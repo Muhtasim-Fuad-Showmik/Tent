@@ -5,7 +5,8 @@ const Schema = mongoose.Schema;
 // Defining the database schema for the table
 const CampgroundSchema = new Schema({
     title: String,
-    price: String,
+    image: String,
+    price: Number,
     description: String,
     location: String
 });

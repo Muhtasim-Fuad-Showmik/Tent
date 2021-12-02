@@ -9,7 +9,11 @@
             </div>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item text-muted"><%= campground.location %> </li>
+                <% if (campground.price > 0){ %> 
                 <li class="list-group-item">$<%= campground.price %>/night</li>
+                <% } else { %>
+                    <li class="list-group-item">Free</li>
+                <% } %>     
             </ul>
             <div class="card-body">
                 <a class="card-link btn btn-info" href="/campgrounds/<%= campground._id %>/edit">Edit</a>

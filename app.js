@@ -2,11 +2,12 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
-const { campgroundSchema } = require('./schemas.js');
+const { campgroundSchema, reviewSchema } = require('./schemas.js');
 const catchAsync = require('./utils/catchAsync');
 const ExpressError = require('./utils/ExpressError');
 const methodOverride = require('method-override');
 const Campground = require('./models/campground');
+const Review = require('./models/review');
     
 // Connecting mongoose database
 mongoose.connect('mongodb://localhost:27017/tent');
@@ -45,6 +46,19 @@ const validateCampground = (req, res, next) => {
     }
 }
 
+const validateReview = (req, res, next) => {
+    // Collecting the details of the validation error
+     const { error } = reviewSchema.validate(req.body);
+     if(error){
+         // Mapping over the details of the validation error and converting the
+         // contents into a commma separated string to use as an error message.
+         const msg = error.details.map(el => el.message).join(', ');
+         throw new ExpressError(msg, 422);
+     } else {
+         next();
+     }
+ }
+
 // Rendering default page
 app.get('/', (req, res) => {
     res.render('home')
@@ -72,7 +86,7 @@ app.post('/campgrounds', validateCampground, catchAsync(async (req, res, next) =
 
 // Link for redirecting to the details of a campground
 app.get('/campgrounds/:id', catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id)
+    const campground = await Campground.findById(req.params.id).populate('reviews');
     res.render('campgrounds/show', { campground });
 }))
 
@@ -94,6 +108,16 @@ app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
     const { id } = req.params;
     await Campground.findByIdAndDelete(id);
     res.redirect('/campgrounds');
+}))
+
+// Link for posting reviews into the database
+app.post('/campgrounds/:id/reviews', validateReview, catchAsync(async (req, res) => {
+    const campground = await Campground.findById(req.params.id);
+    const review = new Review(req.body.review);
+    campground.reviews.push(review);
+    await review.save();
+    await campground.save();
+    res.redirect(`/campgrounds/${campground._id}`);
 }))
 
 // 404 request handling when every other URL up top has not matched the request

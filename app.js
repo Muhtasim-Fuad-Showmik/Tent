@@ -2,12 +2,12 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
-const { campgroundSchema, reviewSchema } = require('./schemas.js');
-const catchAsync = require('./utils/catchAsync');
+const session = require('express-session');
+const flash = require('connect-flash');
 const ExpressError = require('./utils/ExpressError');
 const methodOverride = require('method-override');
-const Campground = require('./models/campground');
-const Review = require('./models/review');
+const campgroundRoutes = require('./routes/campgroundRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
     
 // Connecting mongoose database
 mongoose.connect('mongodb://localhost:27017/tent');
@@ -32,101 +32,43 @@ app.set('views', path.join(__dirname, 'views'))
 app.use(express.urlencoded({extended: true}));
 // Used for overriding methods and therefore generating several other method requests
 app.use(methodOverride('_method'));
+/**
+ * We can't use external files in our project without having
+ * instructed express to server the files. The following line
+ * instructs express to serve all files within the public
+ * directory.
+ */
+app.use(express.static(path.join(__dirname, 'public')));
 
-const validateCampground = (req, res, next) => {
-   // Collecting the details of the validation error
-    const { error } = campgroundSchema.validate(req.body);
-    if(error){
-        // Mapping over the details of the validation error and converting the
-        // contents into a commma separated string to use as an error message.
-        const msg = error.details.map(el => el.message).join(', ');
-        throw new ExpressError(msg, 422);
-    } else {
-        next();
+// Configuring the session while using an expiry date and other default configs.
+const sessionConfig = {
+    secret: 'thisshouldbeabettersecret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true,
+        express: Date.now() + (7 * 24 * 60 * 60 * 1000),
+        maxAge: 7 * 24 * 60 * 60 * 1000
     }
 }
+app.use(session(sessionConfig));
 
-const validateReview = (req, res, next) => {
-    // Collecting the details of the validation error
-     const { error } = reviewSchema.validate(req.body);
-     if(error){
-         // Mapping over the details of the validation error and converting the
-         // contents into a commma separated string to use as an error message.
-         const msg = error.details.map(el => el.message).join(', ');
-         throw new ExpressError(msg, 422);
-     } else {
-         next();
-     }
- }
+// Used for generating flash messages across the application
+app.use(flash());
+
+app.use((req, res, next) => {
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
+})
+
+app.use('/campgrounds', campgroundRoutes);
+app.use('/campgrounds/:id/reviews', reviewRoutes);
 
 // Rendering default page
 app.get('/', (req, res) => {
     res.render('home')
 })
-
-// Link for displaying all campgrounds within the database.
-app.get('/campgrounds', catchAsync(async (req, res) => {
-    // Fetching all campgrounds.
-    const campgrounds = await Campground.find({});
-    // Sending all campgrounds to the ejs file for rendering.
-    res.render('campgrounds/index', { campgrounds })
-}))
-
-// Link for a form to add new campgrounds to the application
-app.get('/campgrounds/new', (req, res) => {
-    res.render('campgrounds/new');
-})
-
-// Link for uploading the data collected from the for adding a new campground.
-app.post('/campgrounds', validateCampground, catchAsync(async (req, res, next) => {
-    const campground = new Campground(req.body.campground);
-    await campground.save();
-    res.redirect(`campgrounds/${campground._id}`);
-}))
-
-// Link for redirecting to the details of a campground
-app.get('/campgrounds/:id', catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id).populate('reviews');
-    res.render('campgrounds/show', { campground });
-}))
-
-// Link for accessing the form for updating existing campground data.
-app.get('/campgrounds/:id/edit', catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id)
-    res.render('campgrounds/edit', { campground });
-}))
-
-// Link for submission of updated data for the campground.
-app.put('/campgrounds/:id', validateCampground, catchAsync(async (req, res) => {
-    const { id } = req.params;
-    const campground = await Campground.findByIdAndUpdate(id, { ...req.body.campground });
-    res.redirect(`/campgrounds/${campground._id}`);
-}))
-
-// Link for deleting a campground
-app.delete('/campgrounds/:id', catchAsync(async (req, res) => {
-    const { id } = req.params;
-    await Campground.findByIdAndDelete(id);
-    res.redirect('/campgrounds');
-}))
-
-// Link for posting reviews into the database
-app.post('/campgrounds/:id/reviews', validateReview, catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id);
-    const review = new Review(req.body.review);
-    campground.reviews.push(review);
-    await review.save();
-    await campground.save();
-    res.redirect(`/campgrounds/${campground._id}`);
-}))
-
-// Link for deleting reviews
-app.delete('/campgrounds/:id/reviews/:reviewId', catchAsync(async (req, res) => {
-    const { id, reviewId } = req.params;
-    await Campground.findByIdAndUpdate(id, {$pull: {reviews: reviewId }});
-    await Review.findByIdAndDelete(reviewId);
-    res.redirect(`/campgrounds/${id}`);
-}))
 
 // 404 request handling when every other URL up top has not matched the request
 app.all('*', (req, res, next) => {

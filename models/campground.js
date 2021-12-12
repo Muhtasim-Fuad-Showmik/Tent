@@ -1,6 +1,7 @@
 
 const mongoose = require('mongoose');
 const Review = require('./review');
+const User = require('./user');
 const Schema = mongoose.Schema;
 
 // Defining the database schema for the table
@@ -25,6 +26,10 @@ const CampgroundSchema = new Schema({
     location: {
         type: String,
         required: [true, 'Campground must state its location']
+    },
+    author: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
     },
     reviews: [
         {

@@ -15,6 +15,9 @@ ImageSchema.virtual('thumbnail').get(function() {
     return this.url.replace('/upload', '/upload/w_200');
 });
 
+// To add virtual fields into the JSON object after stringification.
+const options = { toJSON: { virtuals: true } };
+
 // Defining the database schema for the table
 const CampgroundSchema = new Schema({
     title: {
@@ -56,6 +59,14 @@ const CampgroundSchema = new Schema({
             ref: 'Review'
         }
     ]
+}, options);
+
+// Generating thumbnails
+CampgroundSchema.virtual('properties.popUpMarkup').get(function() {
+    return `
+    <strong><a href="/campgrounds/${this._id}">${this.title}</a></strong>
+    <p>${this.location}</p>
+    `;
 });
 
 /*

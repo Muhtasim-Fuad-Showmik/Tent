@@ -10,6 +10,8 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const ExpressError = require('./utils/ExpressError');
 const methodOverride = require('method-override');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require("helmet");
 const passport = require('passport');
 const localStrategy = require('passport-local');
 const User = require('./models/user');
@@ -48,14 +50,19 @@ app.use(methodOverride('_method'));
  * directory.
  */
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(mongoSanitize({
+    replaceWith: '_'
+}));
 
 // Configuring the session while using an expiry date and other default configs.
 const sessionConfig = {
+    name: 'SecureHiddenSessionId', // Changing the name of the session ID makes it impossible for hackers to find the sessions ID by the default name.
     secret: 'thisshouldbeabettersecret',
     resave: false,
     saveUninitialized: true,
     cookie: {
-        httpOnly: true,
+        httpOnly: true, //Makes sure that our cookies can't be accessed by any JS but only via http requests.
+        // secure: true, //This attribute forces the cookie to only work for https sites.
         express: Date.now() + (7 * 24 * 60 * 60 * 1000),
         maxAge: 7 * 24 * 60 * 60 * 1000
     }
@@ -64,6 +71,58 @@ app.use(session(sessionConfig));
 
 // Used for generating flash messages across the application
 app.use(flash());
+
+// Used for managing HTML headers securely
+const scriptSrcUrls = [
+    "https://stackpath.bootstrapcdn.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://api.mapbox.com/",
+    "https://kit.fontawesome.com/",
+    "https://cdnjs.cloudflare.com/",
+    "https://cdn.jsdelivr.net",
+];
+const styleSrcUrls = [
+    "https://kit-free.fontawesome.com/",
+    "https://stackpath.bootstrapcdn.com/",
+    "https://api.mapbox.com/",
+    "https://api.tiles.mapbox.com/",
+    "https://fonts.googleapis.com/",,
+    "https://fonts.gstatic.com/",
+    "https://use.fontawesome.com/",
+    "https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css",
+];
+const connectSrcUrls = [
+    "https://api.mapbox.com/",
+    "https://a.tiles.mapbox.com/",
+    "https://b.tiles.mapbox.com/",
+    "https://events.mapbox.com/",
+];
+const fontSrcUrls = [
+    "https://fonts.googleapis.com",
+    "https://fonts.gstatic.com",
+];
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: [],
+            connectSrc: ["'self'", ...connectSrcUrls],
+            scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+            styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+            fontSrc: ["'self'", ...fontSrcUrls],
+            workerSrc: ["'self'", "blob:"],
+            objectSrc: [],
+            imgSrc: [
+                "'self'",
+                "blob:",
+                "data:",
+                "https://res.cloudinary.com/fuad-dev/", //SHOULD MATCH YOUR CLOUDINARY ACCOUNT! 
+                "https://images.unsplash.com/",
+            ],
+            fontSrc: ["'self'", ...fontSrcUrls],
+        },
+    })
+);
+
 
 // Initializes passport to allow authentication procedures by passport.
 app.use(passport.initialize());

@@ -74,4 +74,6 @@ map.on('load', () => {
         map.getCanvas().style.cursor = '';
         popup.remove();
     });
+
+    map.addControl(new mapboxgl.NavigationControl());
 });

@@ -2,6 +2,28 @@ body, .mapboxgl-popup-content {
     font-family: 'Quicksand', sans-serif;
 }
 
+.nav-logo {
+    width: 30px;
+}
+
+.carousel-img {
+    object-fit: cover;
+    width: 100%;
+    height: 350px;
+}
+
+.index-img {
+    object-fit: cover;
+    width: 100%;
+    height: 350px;
+}
+
+.thumbnail-img {
+    object-fit: cover;
+    width: 100%;
+    height: 70px;
+}
+
 .mapboxgl-popup-content > strong > a {
     text-decoration: none; 
     color: inherit;

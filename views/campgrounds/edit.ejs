@@ -65,7 +65,7 @@
                             <div class="row">
                                 <% campground.images.forEach( (img, i)=> { %>
                                     <div class="col-6 col-md-4">
-                                        <img src="<%= img.thumbnail %>" class="img-thumbnail" alt="">
+                                        <img src="<%= img.thumbnail %>" class="img-thumbnail thumbnail-img" alt="">
                                         <br>
                                         <div class="form-check-inline">
                                             <input type="checkbox" id="img-<%= i %>" name="deleteImages[]"

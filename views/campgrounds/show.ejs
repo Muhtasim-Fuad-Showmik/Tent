@@ -21,10 +21,12 @@
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Next</span>
                 </button>
+                <% } else { %>
+                <img src="/images/tent-image-placeholder.jpg" class="card-img-top" alt="">
                 <% } %> 
             </div>
             <div class="card-body">
-                <h5 class="card-title"><%= campground.title %> </h5>
+                <h1 class="card-title"><%= campground.title %> </h1>
                 <p class="card-text"><%= campground.description %> </p>
             </div>
             <ul class="list-group list-group-flush">
@@ -50,6 +52,10 @@
         </div>
     </div>
     <div class="col-6">
+        <div class="mb-3">
+            <h2>Location on Map</h2>
+            <div id='map' style='width: 100%; height: 300px;'></div>
+        </div> 
         <h2>Reviews</h2>
         <% if(currentUser) { %> 
         <form class="mb-3 needs-validation" action="/campgrounds/<%= campground._id %>/reviews" method="POST" novalidate>
@@ -83,7 +89,7 @@
             </div>
             <button class="btn btn-success">Submit</button>
         </form>
-        <% } %> 
+        <% } %>
         <% for(let review of campground.reviews) { %> 
             <div class="card mb-3">
                 <div class="card-body">
@@ -100,6 +106,12 @@
                     <% } %> 
                 </div>
             </div>
-        <% } %> 
+        <% } %>
     </div>
 </div>
+
+<script>
+    const mapToken = '<%- process.env.MAPBOX_TOKEN %>';
+    const campground = <%- JSON.stringify(campground) %>;
+</script>
+<script src="/javascripts/showPageMap.js"></script>

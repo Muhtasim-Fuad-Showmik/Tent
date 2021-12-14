@@ -22,6 +22,17 @@ const CampgroundSchema = new Schema({
         required: [true, 'Campground must have a name']
     },
     images: [ImageSchema],
+    geometry: {
+        type: {
+            type: String,
+            enum: ['Point'],
+            required: true
+        },
+        coordinates: {
+            type: [Number],
+            required: true
+        }
+    },
     price: {
         type: Number,
         required: [true, 'Campground must have a declared price'],

@@ -22,7 +22,7 @@
                     <span class="visually-hidden">Next</span>
                 </button>
                 <% } else { %>
-                <img src="/images/tent-image-placeholder.jpg" class="card-img-top" alt="">
+                <!-- <img src="/images/tent-image-placeholder.jpg" class="card-img-top" alt=""> -->
                 <% } %> 
             </div>
             <div class="card-body">
@@ -97,7 +97,7 @@
                     <p class="starability-result" data-rating="<%= review.rating %>">
                         Rated: 3 stars
                     </p>
-                    <h4 class="card-subtitle mb-2 text-muted">By <%= review.author.username %></h4>
+                    <!-- <h4 class="card-subtitle mb-2 text-muted">By <%= review.author.username %></h4> -->
                     <p class="card-text">Review: <%= review.body %> </p>
                     <% if( currentUser && review.author.equals(currentUser)) { %> 
                     <form action="/campgrounds/<%= campground._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">

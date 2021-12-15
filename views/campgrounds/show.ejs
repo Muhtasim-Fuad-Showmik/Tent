@@ -90,6 +90,7 @@
             <button class="btn btn-success">Submit</button>
         </form>
         <% } %>
+        <% if(campground.reviews.length > 0){ %> 
         <% for(let review of campground.reviews) { %> 
             <div class="card mb-3">
                 <div class="card-body">
@@ -107,6 +108,16 @@
                 </div>
             </div>
         <% } %>
+        <% } else { %>
+            <div class="card mb-3">
+                <div class="card-body">
+                    <p class="card-text">
+                        No reviews on this campground yet.
+                        Be the first to leave a review here.
+                    </p>
+                </div>
+            </div>
+        <% } %> 
     </div>
 </div>
 

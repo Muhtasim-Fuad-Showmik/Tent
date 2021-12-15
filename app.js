@@ -14,6 +14,8 @@ const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require("helmet");
 const passport = require('passport');
 const localStrategy = require('passport-local');
+const dbUrl = process.env.DB_URL;
+const dbLocal = process.env.DB_LOCAL_URL;
 const User = require('./models/user');
 
 const authRoutes = require('./routes/authRoutes');
@@ -21,7 +23,7 @@ const campgroundRoutes = require('./routes/campgroundRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
     
 // Connecting mongoose database
-mongoose.connect('mongodb://localhost:27017/tent');
+mongoose.connect(dbLocal);
 
 // Displaying mongoose success or error messages on the console
 const db = mongoose.connection;

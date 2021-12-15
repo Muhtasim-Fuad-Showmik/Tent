@@ -6,8 +6,20 @@ const mapBoxToken = process.env.MAPBOX_TOKEN;
 const geocoder = mbxGeocoding({ accessToken: mapBoxToken });
 
 module.exports.index = async (req, res) => {
-    // Fetching all campgrounds.
-    const campgrounds = await Campground.find({});
+    // Collecting the search query
+    const { q } = req.query;
+
+    // Generating search configurations using regex
+    let options = {};
+    let campgrounds;
+    if(q) {
+        // Fetching searched campgrounds.
+        campgrounds = await Campground.find({ $text: {$search: q} });
+    } else {
+        // Fetching all campgrounds.
+        campgrounds = await Campground.find({});
+    }
+
     // Sending all campgrounds to the ejs file for rendering.
     res.render('campgrounds/index', { campgrounds })
 };

@@ -22,7 +22,8 @@ const options = { toJSON: { virtuals: true } };
 const CampgroundSchema = new Schema({
     title: {
         type: String,
-        required: [true, 'Campground must have a name']
+        required: [true, 'Campground must have a name'],
+        index: true
     },
     images: [ImageSchema],
     geometry: {
@@ -47,7 +48,8 @@ const CampgroundSchema = new Schema({
     },
     location: {
         type: String,
-        required: [true, 'Campground must state its location']
+        required: [true, 'Campground must state its location'],
+        index: true
     },
     author: {
         type: Schema.Types.ObjectId,
@@ -60,6 +62,8 @@ const CampgroundSchema = new Schema({
         }
     ]
 }, options);
+
+CampgroundSchema.index({ title: "text", location: "text" }); 
 
 // Generating thumbnails
 CampgroundSchema.virtual('properties.popUpMarkup').get(function() {

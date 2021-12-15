@@ -31,7 +31,7 @@ module.exports.index = async (req, res) => {
 
     const pageCount = Math.ceil(itemCount / req.query.limit);
     const currentPage = req.query.page;
-    const pages = paginate.getArrayPages(req)(10, pageCount, req.query.page);
+    const pages = paginate.getArrayPages(req)(7, pageCount, req.query.page);
 
     let previousPage = pages.filter(page => {
         return page.number === currentPage - 1;

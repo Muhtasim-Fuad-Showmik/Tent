@@ -1,7 +1,7 @@
 <% layout('layout/boilerplate') %>
 <div id="clusterMap"></div>
 <h1 style="text-align: center; margin-bottom: 20px;">All Campgrounds</h1>
-<div class="col-6 offset-3 mb-4">
+<div class="col-md-6 offset-md-3 mb-4">
     <form class="d-flex" action="/campgrounds" method="GET">
         <input name="q" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
         <button class="btn btn-info" type="submit">Search</button>
@@ -33,11 +33,11 @@
 <div class="d-flex justify-content-center">
     <nav aria-label="Page navigation">
         <ul class="pagination">
-            <li class="page-item <%= (currentPage == 1) ? "disabled" : "" %>"><a class="page-link" href="<%= (previousPage) ? previousPage.url : "" %> ">Previous</a></li>
+            <li class="page-item <%= (currentPage == 1) ? "disabled" : "" %>"><a class="page-link" href="<%= (previousPage) ? previousPage.url : "" %> ">&laquo;</a></li>
             <% for(let i=0; i < pages.length; i++){ %>
             <li class="page-item <%= (pages[i].number === currentPage) ? "active" : "" %>"><a class="page-link" href="<%= pages[i].url %>"><%= pages[i].number %></a></li>
             <% } %>
-            <li class="page-item <%= (currentPage == pageCount) ? "disabled" : "" %>"><a class="page-link" href="<%= (nextPage) ? nextPage.url : "" %> ">Next</a></li>
+            <li class="page-item <%= (currentPage == pageCount) ? "disabled" : "" %>"><a class="page-link" href="<%= (nextPage) ? nextPage.url : "" %> ">&raquo;</a></li>
         </ul>
     </nav>
 </div>

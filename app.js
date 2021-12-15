@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
 const paginate = require('express-paginate');
 const session = require('express-session');
+const MongoDBStore = require('connect-mongo');
 const flash = require('connect-flash');
 const ExpressError = require('./utils/ExpressError');
 const methodOverride = require('method-override');
@@ -15,8 +16,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require("helmet");
 const passport = require('passport');
 const localStrategy = require('passport-local');
-const dbUrl = process.env.DB_URL;
-const dbLocal = process.env.DB_LOCAL_URL;
+const dbUrl = process.env.DB_LOCAL_URL;
 const User = require('./models/user');
 
 const authRoutes = require('./routes/authRoutes');
@@ -24,7 +24,7 @@ const campgroundRoutes = require('./routes/campgroundRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
     
 // Connecting mongoose database
-mongoose.connect(dbLocal);
+mongoose.connect(dbUrl);
 
 // Displaying mongoose success or error messages on the console
 const db = mongoose.connection;
@@ -64,8 +64,19 @@ app.all(function (req, res, next) {
     next();
 });
 
+const store = MongoDBStore.create({
+    mongoUrl: dbUrl,
+    secret: 'thisshouldbeabettersecret',
+    touchAfter: 24 * 60 * 60
+});
+
+store.on("error", function (e) {
+    console.log("Session Store Error");
+});
+
 // Configuring the session while using an expiry date and other default configs.
 const sessionConfig = {
+    store,
     name: 'SecureHiddenSessionId', // Changing the name of the session ID makes it impossible for hackers to find the sessions ID by the default name.
     secret: 'thisshouldbeabettersecret',
     resave: false,

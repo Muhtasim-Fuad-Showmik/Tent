@@ -40,10 +40,6 @@ module.exports.index = async (req, res) => {
         return page.number === currentPage + 1;
     });
     nextPage = nextPage[0];
-    console.log(previousPage);
-    console.log(nextPage);
-    console.log(pageCount);
-    console.log(paginate.getArrayPages(req)(10, pageCount, req.query.page));
 
     res.render('campgrounds/index', {
         campgrounds: results,

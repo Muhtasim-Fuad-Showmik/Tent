@@ -16,7 +16,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require("helmet");
 const passport = require('passport');
 const localStrategy = require('passport-local');
-const dbUrl = process.env.DB_LOCAL_URL;
+const dbUrl = process.env.DB_URL || process.env.DB_LOCAL_URL;
 const User = require('./models/user');
 
 const authRoutes = require('./routes/authRoutes');
@@ -64,9 +64,13 @@ app.all(function (req, res, next) {
     next();
 });
 
+// Acquiring the secret key
+const secret = process.env.SECRET || 'thisshouldbeabettersecret';
+
+// Setting up a store for the session variable on the Mongo Database
 const store = MongoDBStore.create({
     mongoUrl: dbUrl,
-    secret: 'thisshouldbeabettersecret',
+    secret,
     touchAfter: 24 * 60 * 60
 });
 
@@ -78,7 +82,7 @@ store.on("error", function (e) {
 const sessionConfig = {
     store,
     name: 'SecureHiddenSessionId', // Changing the name of the session ID makes it impossible for hackers to find the sessions ID by the default name.
-    secret: 'thisshouldbeabettersecret',
+    secret,
     resave: false,
     saveUninitialized: true,
     cookie: {

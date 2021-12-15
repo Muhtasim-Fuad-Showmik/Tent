@@ -1,4 +1,5 @@
 const Campground = require('../models/campground');
+const paginate = require('express-paginate');
 const { cloudinary } = require('../cloudinary');
 
 const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
@@ -11,17 +12,51 @@ module.exports.index = async (req, res) => {
 
     // Generating search configurations using regex
     let options = {};
-    let campgrounds;
+    let results;
+    let itemCount;
     if(q) {
         // Fetching searched campgrounds.
-        campgrounds = await Campground.find({ $text: {$search: q} });
+        [results, itemCount] = await Promise.all([
+            Campground.find({ $text: {$search: q} }).limit(req.query.limit).skip(req.skip).lean().exec(),
+            Campground.find({ $text: {$search: q} }).count({})
+        ]);
     } else {
         // Fetching all campgrounds.
-        campgrounds = await Campground.find({});
+        [results, itemCount] = await Promise.all([
+            Campground.find({}).limit(req.query.limit).skip(req.skip).lean().exec(),
+            Campground.find({}).count({})
+        ]);
     }
 
+    const pageCount = Math.ceil(itemCount / req.query.limit);
+    const currentPage = req.query.page;
+    const pages = paginate.getArrayPages(req)(10, pageCount, req.query.page);
+
+    let previousPage = pages.filter(page => {
+        return page.number === currentPage - 1;
+    });
+    previousPage = previousPage[0];
+    let nextPage = pages.filter(page => {
+        return page.number === currentPage + 1;
+    });
+    nextPage = nextPage[0];
+    console.log(previousPage);
+    console.log(nextPage);
+    console.log(pageCount);
+    console.log(paginate.getArrayPages(req)(10, pageCount, req.query.page));
+
+    res.render('campgrounds/index', {
+        campgrounds: results,
+        pageCount,
+        itemCount,
+        previousPage,
+        currentPage,
+        nextPage,
+        pages
+    });
+
     // Sending all campgrounds to the ejs file for rendering.
-    res.render('campgrounds/index', { campgrounds })
+    // res.render('campgrounds/index', { campgrounds })
 };
 
 module.exports.renderNewForm = (req, res) => {

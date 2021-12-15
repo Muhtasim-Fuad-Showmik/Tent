@@ -6,6 +6,7 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const ejsMate = require('ejs-mate');
+const paginate = require('express-paginate');
 const session = require('express-session');
 const flash = require('connect-flash');
 const ExpressError = require('./utils/ExpressError');
@@ -55,6 +56,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(mongoSanitize({
     replaceWith: '_'
 }));
+
+// Stop infinite fetching from queries
+app.all(function (req, res, next) {
+    // set default or minimum is 10 (as it was prior to v0.2.0)
+    if (req.query.limit <= 10) req.query.limit = 10;
+    next();
+});
 
 // Configuring the session while using an expiry date and other default configs.
 const sessionConfig = {
@@ -155,6 +163,12 @@ app.use((req, res, next) => {
 //     const newUser = await User.register(user, 'chicken');
 //     res.send(newUser);
 // })
+
+/**
+ * Setting up pagination with first argument being the number of items per page,
+ * and the second argument being the maximum number of items allowed per page.
+ */
+ app.use(paginate.middleware(10, 50));
 
 app.use('/', authRoutes);
 app.use('/campgrounds', campgroundRoutes);

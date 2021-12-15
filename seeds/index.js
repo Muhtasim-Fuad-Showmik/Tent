@@ -6,9 +6,10 @@ const {places, descriptors} = require('./seedHelpers');
 const Campground = require('../models/campground');
 const review = require('../models/review');
 const user = require('../models/user');
+const dbUrl = 'mongodb+srv://admin_fuad:royi3fFBEA5pCs2k@devcluster.1bpa6.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
     
 // Connecting mongoose database
-mongoose.connect('mongodb://localhost:27017/tent');
+mongoose.connect(dbUrl);
 
 // Displaying mongoose success or error messages on the console
 const db = mongoose.connection;
@@ -35,6 +36,7 @@ const seedDB = async () => {
     });
 
     const savedUser = await defaultUser.save();
+    console.log(savedUser);
 
     // Create 50 random records with locations and titles of the campgrounds
     for(let i=0; i < 300; i++){
@@ -59,7 +61,8 @@ const seedDB = async () => {
             images: randomImages
         });
 
-        await camp.save();
+        const savedCamp = await camp.save();
+        console.log(savedCamp);
     }
 }
 

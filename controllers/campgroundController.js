@@ -14,6 +14,7 @@ module.exports.index = async (req, res) => {
     let options = {};
     let results;
     let itemCount;
+    const campgroundsForMap = await Campground.find({});
     if(q) {
         // Fetching searched campgrounds.
         [results, itemCount] = await Promise.all([
@@ -43,6 +44,7 @@ module.exports.index = async (req, res) => {
 
     res.render('campgrounds/index', {
         campgrounds: results,
+        campgroundsForMap,
         pageCount,
         itemCount,
         previousPage,
